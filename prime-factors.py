@@ -12,7 +12,7 @@ class NextPrime:
         self.starters = [0, 15, 1, 1, 3, 1, 0, 3, 1, 0, 0, 5, 0, 3, 1]
 
     def create_primes(self):
-        while self.last_prime < 10000:
+        while self.last_prime < 100000000:
             self.append_next_prime()
 
     def append_next_prime(self):
@@ -61,19 +61,15 @@ def check_starters(p, next_prime, target):
     amount_starters = next_prime.starters[p % 15]
     added_so_far = 0
     amount_all = 0
-    starters = []
     max_contribution = target // p + 1
-    for n in range(1, p):
+    for n in range(1, target % p + 1):
         expanded = pow(n, 15) + 1
         if expanded % p == 0:
-            starters.append(n)
             added_so_far += 1
             multiplicativity = ((target - n) // p) + 1
             amount_all += multiplicativity * p
-#            if multiplicativity < max_contribution:
-#                amount_all += multiplicativity * p * (amount_starters - added_so_far)
-#                break
-    print(starters)
+    multiplicativity = ((target - p) // p) + 1
+    amount_all += multiplicativity * p * (amount_starters - added_so_far)
     return amount_all
 
 
@@ -92,6 +88,7 @@ def main():
         i += 1
         if i % 100000 == 0:
             print("Iteration: " + str(i) + "Latest: " + str(contribution) + " Added: " + str(result))
+    print(result)
 
 
 if __name__ == "__main__":
