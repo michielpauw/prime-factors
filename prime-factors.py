@@ -12,7 +12,7 @@ class NextPrime:
         self.starters = [0, 15, 1, 1, 3, 1, 0, 3, 1, 0, 0, 5, 0, 3, 1]
 
     def create_primes(self):
-        while self.last_prime < 100000000:
+        while self.last_prime < 10000:
             self.append_next_prime()
 
     def append_next_prime(self):
@@ -57,102 +57,41 @@ class NextPrime:
             return False
 
 
-def sum_of_primes(expanded, upper_limit, next_prime):
-    sum_of_primes = []
-    current_prime = 2
-    new_prime = True
-    while current_prime <= expanded and current_prime <= upper_limit:
-        if expanded % current_prime == 0:
-            if new_prime:
-                sum_of_primes.append(current_prime)
-            expanded /= current_prime
-            if next_prime.check_big_prime(expanded):
-                sum_of_primes.append(expanded)
-                return sum_of_primes
-            new_prime = False
-        else:
-            new_prime = True
-            current_prime = next_prime.get_next_prime()
-            if not current_prime:
-                return sum_of_primes
-    return sum_of_primes
-
-
-def factorize_first(n, upper_limit, next_prime):
-    f = []
-    sum_p = []
-    f.append(n + 1)
-    f.append(pow(n, 2) - n + 1)
-    f.append(pow(n, 4) - pow(n, 3) + pow(n, 2) - n + 1)
-    f.append(pow(n, 8) + pow(n, 7) - pow(n, 5) - pow(n, 4) - pow(n, 3) + n + 1)
-    for factor in f:
-        if factor > 1:
-            sum_new = sum_of_primes(factor, upper_limit, next_prime)
-            sum_p.extend(x for x in sum_new if x not in sum_p)
-    return sum(list(sum_p))
-
-
-def check_pattern(p_mod_15, amount_starters):
-    if p_mod_15 == 1 and amount_starters != 15:
-        return False
-    if p_mod_15 == 2 and amount_starters != 1:
-        return False
-    if p_mod_15 == 3 and amount_starters != 1:
-        return False
-    if p_mod_15 == 4 and amount_starters != 3:
-        return False
-    if p_mod_15 == 5 and amount_starters != 1:
-        return False
-    if p_mod_15 == 6:
-        print("CHECK 6: " + str(amount_starters))
-        return True
-    if p_mod_15 == 7 and amount_starters != 3:
-        return False
-    if p_mod_15 == 8 and amount_starters != 1:
-        return False
-    if p_mod_15 == 9:
-        print("CHECK 9: " + str(amount_starters))
-        return True
-    if p_mod_15 == 10:
-        print("CHECK 10: " + str(amount_starters))
-        return True
-    if p_mod_15 == 11 and amount_starters != 5:
-        return False
-    if p_mod_15 == 12:
-        print("CHECK 12: " + str(amount_starters))
-        return True
-    if p_mod_15 == 13 and amount_starters != 3:
-        return False
-    if p_mod_15 == 14 and amount_starters != 1:
-        return False
-    return True
-
-
-def get_starters(prime):
-    n = 0
+def check_starters(p, next_prime, target):
+    amount_starters = next_prime.starters[p % 15]
+    added_so_far = 0
+    amount_all = 0
     starters = []
-    amount_starters = 0
-    while n < prime:
-        n += 1
-        if n % prime in starters:
-            continue
+    max_contribution = target // p + 1
+    for n in range(1, p):
         expanded = pow(n, 15) + 1
-        if expanded % prime == 0:
+        if expanded % p == 0:
             starters.append(n)
-            amount_starters += 1
-    if not check_pattern(prime % 15, amount_starters):
-        print("FUCK")
-        sys.exit(0)
-    return amount_starters
+            added_so_far += 1
+            multiplicativity = ((target - n) // p) + 1
+            amount_all += multiplicativity * p
+#            if multiplicativity < max_contribution:
+#                amount_all += multiplicativity * p * (amount_starters - added_so_far)
+#                break
+    print(starters)
+    return amount_all
 
 
 def main():
     next_prime = NextPrime()
     print("DONE")
-    total_starters = 0
+    result = 0
+    target = pow(10, 11)
+    i = 0
     for p in next_prime.current_primes:
-        total_starters += get_starters(p)
-        print(total_starters)
+        if next_prime.starters[p % 15] == 1:
+            contribution = (((target - (p - 1)) // p) + 1) * p
+        else:
+            contribution = check_starters(p, next_prime, target)
+        result += contribution
+        i += 1
+        if i % 100000 == 0:
+            print("Iteration: " + str(i) + "Latest: " + str(contribution) + " Added: " + str(result))
 
 
 if __name__ == "__main__":
